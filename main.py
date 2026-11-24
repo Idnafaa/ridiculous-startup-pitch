@@ -28,11 +28,17 @@ def main() -> None:
         raise SystemExit(f"pitch is {len(text)} characters, over the 200 limit")
     if text.count(".") != 1 or not text.endswith("."):
         raise SystemExit("pitch must be exactly one sentence")
+    if "\n" in text or "\r" in text:
+        raise SystemExit("pitch must be a single line")
 
     out_dir = Path("/output")
     out_dir.mkdir(parents=True, exist_ok=True)
     out_path = out_dir / "entry.txt"
     out_path.write_text(text, encoding="utf-8")
+    # Read it back: the gate reads this exact file, so confirm what landed
+    # on disk is byte-for-byte the pitch we validated above.
+    if out_path.read_text(encoding="utf-8") != text:
+        raise SystemExit("entry.txt on disk does not match the pitch")
     print(f"wrote {len(text)} characters to {out_path}")
 
 
